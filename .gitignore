@@ -3,6 +3,8 @@
 .RData
 .Ruserdata
 deidRaw/output
-deidRaw/IMPACTS-DataForMedicationAdh_DATA_NOHDRS_2022-04-26_0801.csv
+deidRaw/code/IMPACTS-DataForMedicationAdh_DATA_NOHDRS_2022-04-26_0801.csv
+deidRaw/code/IMPACTS-DataForMedicationAdh.do
 mutate/output
 mutate/code/descriptiveAnalysis.docx
+deidRaw/code/README.txt
