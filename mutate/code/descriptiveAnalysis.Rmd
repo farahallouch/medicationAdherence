@@ -22,7 +22,7 @@ library(flextable)
 
 \newpage
 ```{r}
-medAdherence <- haven::read_dta("C:/Users/fallouch/Box/IMPACTS ARMSTRONG/Farah/medicationAdherence/deidRaw/output/medAdherence.dta")
+medAdherence <- haven::read_dta("../../deidRaw/output/medAdherence.dta")
 
 medAdherence <- medAdherence %>% 
   mutate(forget_adh_format = case_when(forget_adh == 0 ~ 1,
@@ -56,6 +56,8 @@ medAdherence <- medAdherence %>%
                                           between(morisky_score, 6.1, 7.9) ~ "Medium adherence",
                                           morisky_score <= 6 ~ "Low adherence"),
                                        levels = c("High adherence", "Medium adherence", "Low adherence")),
+         morisky_score_format_dich = ifelse((morisky_score_format == "High adherence" |
+                                              morisky_score_format == "Medium adherence"), 1, 0),
          redcap_event_name = ifelse(redcap_event_name == "bv1sv_arm_1", "bv1", "bv2"),
          not_take_padh_format = case_when(not_take_padh == 1 ~ 4,
                                           not_take_padh == 2 ~ 3,
@@ -71,23 +73,28 @@ medAdherence <- medAdherence %>%
          pilot_medadh = ifelse(is.na(not_take_padh_format) |
                                  is.na(cut_back_padh_format) |
                                  prescr_padh == 0, NA, pilot_medadh),
-         uncontrolled_bp_140 = ifelse(sys_avg_bp >= 140 |
-                                   dias_avg_bp >= 90, 1, 0))
+         pilot_medadh_format_7 = ifelse(pilot_medadh >= 7, "High adherence", "Low adherence"),
+         pilot_medadh_format_8 = ifelse(pilot_medadh == 8, "High adherence", "Low adherence"),
+         pilot_medadh_format_7_reg = ifelse(pilot_medadh >= 7, 1, 0),
+         pilot_medadh_format_8_reg = ifelse(pilot_medadh == 8, 1, 0))
 
 medAdherence_wide <- pivot_wider(data = medAdherence,
                                  id_cols = record_id,
                                  names_from = redcap_event_name,
                                  values_from = c(age_bdl, sex_bdl, race_bdl, hispanic_bdl, income_bdl,
                                                  sys_avg_bp, dias_avg_bp,
-                                                 morisky_score, morisky_score_format,
-                                                 pilot_medadh,
-                                                 uncontrolled_bp_140))
+                                                 morisky_score, morisky_score_format, morisky_score_format_dich,
+                                                 pilot_medadh, pilot_medadh_format_7, pilot_medadh_format_8, pilot_medadh_format_7_reg, pilot_medadh_format_8_reg))
 
 not_all_na <- function(x) any(!is.na(x))
 
 medAdherence_wide <- medAdherence_wide %>% 
   select(where(not_all_na)) %>% 
-  select(-pilot_medadh_bv1) %>%
+  select(-c(pilot_medadh_bv1,
+            pilot_medadh_format_7_bv1,
+            pilot_medadh_format_8_bv1,
+            pilot_medadh_format_7_reg_bv1,
+            pilot_medadh_format_8_reg_bv1)) %>%
   filter(!is.na(morisky_score_bv2)) %>% 
   rename(morisky_score = morisky_score_bv2,
          morisky_score_format = morisky_score_format_bv2,
@@ -95,11 +102,15 @@ medAdherence_wide <- medAdherence_wide %>%
          sbp_bv2 = sys_avg_bp_bv2,
          dbp_bv1 = dias_avg_bp_bv1,
          dbp_bv2 = dias_avg_bp_bv2,
-         pilot_medadh = pilot_medadh_bv2) %>% 
-  mutate(sbp_bv1_bv2 = (sbp_bv1 + sbp_bv2) / 2,
-         dbp_bv1_bv2 = (dbp_bv1 + dbp_bv2) / 2,
-         uncontrolled_bp_140_bv1_bv2 = ifelse(uncontrolled_bp_140_bv1 == 1 |
-                                                uncontrolled_bp_140_bv2 == 1, 1, 0))
+         pilot_medadh = pilot_medadh_bv2)
+
+medAdherence_wide <- medAdherence_wide %>% 
+  mutate(sbp_bv1_bv2 = rowMeans(select(medAdherence_wide, c(sbp_bv1, sbp_bv2))),
+         dbp_bv1_bv2 = rowMeans(select(medAdherence_wide, c(dbp_bv1, dbp_bv2)))) %>% 
+  mutate(uncontrolled_bp_140_BV1 = ifelse((sbp_bv1 >= 140 |
+                                             dbp_bv1 >= 90), 1, 0),
+         uncontrolled_bp_140_6BP = ifelse((sbp_bv1_bv2 >= 140 |
+                                            dbp_bv1_bv2 >= 90), 1, 0))
 ```
 
 # Study population characteristics
@@ -108,7 +119,8 @@ medAdherence_wide %>%
   select(-c(record_id,
             sbp_bv1_bv2,
             dbp_bv1_bv2,
-            uncontrolled_bp_140_bv1_bv2)) %>% 
+            pilot_medadh_format_7_reg_bv2,
+            pilot_medadh_format_8_reg_bv2)) %>% 
   tbl_summary(label = NULL) %>% 
   modify_header(label = "**Variable**") %>% 
   bold_labels()
@@ -127,11 +139,11 @@ lm(sbp_bv1_bv2 ~ morisky_score_format, data = medAdherence_wide) %>%
   modify_header(label = "**Variable**") %>% 
   bold_labels()
 
-glm(uncontrolled_bp_140_bv1_bv2 ~ morisky_score_format,
+glm(uncontrolled_bp_140_6BP ~ morisky_score_format,
     data = medAdherence_wide,
     family = binomial(link = "logit")) %>% 
   tbl_regression(exponentiate = TRUE) %>% 
-  modify_caption("Uncontrolled BP (140/90) at BV1 or BV2 on Morisky score") %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Morisky score") %>% 
   modify_header(label = "**Variable**") %>% 
   bold_labels()
 
@@ -154,7 +166,7 @@ lm(sbp_bv1 ~ morisky_score_format, data = medAdherence_wide) %>%
   modify_header(label = "**Variable**") %>% 
   bold_labels()
 
-glm(uncontrolled_bp_140_bv1 ~ morisky_score_format,
+glm(uncontrolled_bp_140_BV1 ~ morisky_score_format,
     data = medAdherence_wide,
     family = binomial(link = "logit")) %>% 
   tbl_regression(exponentiate = TRUE) %>% 
@@ -178,14 +190,6 @@ cor.test(medAdherence_wide$sbp_bv2, medAdherence_wide$morisky_score)
 lm(sbp_bv2 ~ morisky_score_format, data = medAdherence_wide) %>% 
   tbl_regression() %>% 
   modify_caption("Systolic BP at BV2 on Morisky score") %>% 
-  modify_header(label = "**Variable**") %>% 
-  bold_labels()
-
-glm(uncontrolled_bp_140_bv2 ~ morisky_score_format,
-    data = medAdherence_wide,
-    family = binomial(link = "logit")) %>% 
-  tbl_regression(exponentiate = TRUE) %>% 
-  modify_caption("Uncontrolled BP (140/90) at BV2 on Morisky score") %>% 
   modify_header(label = "**Variable**") %>% 
   bold_labels()
 
@@ -259,6 +263,38 @@ ggplot(aes(x = morisky_score, y = dbp_bv2), data = medAdherence_wide) +
 # Pilot medication adherence score and Morisky score
 ```{r}
 cor.test(medAdherence_wide$pilot_medadh, medAdherence_wide$morisky_score)
+```
+
+## Kappa of pilot medication adherence score (>=7) and Morisky score
+``` {r}
+vcd::Kappa(table(medAdherence_wide$morisky_score_format_dich, medAdherence_wide$pilot_medadh_format_7_reg_bv2))
+```
+
+## Kappa of pilot medication adherence score (==8) and Morisky score
+``` {r}
+vcd::Kappa(table(medAdherence_wide$morisky_score_format_dich, medAdherence_wide$pilot_medadh_format_8_reg_bv2))
+```
+
+``` {r}
+medAdherence_wide <- medAdherence_wide %>% 
+  mutate(morisky_score_format = factor(morisky_score_format,
+                                       levels = c("Low adherence", "Medium adherence", "High adherence")))
+
+glm(pilot_medadh_format_7_reg_bv2 ~ morisky_score_format,
+    data = medAdherence_wide,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Pilot medication adherence scale (>=7) on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(pilot_medadh_format_8_reg_bv2 ~ morisky_score_format,
+    data = medAdherence_wide,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Pilot medication adherence scale (==8) on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
 
 ggplot(aes(x = morisky_score, y = pilot_medadh), data = medAdherence_wide) +
   geom_point() +
@@ -275,11 +311,19 @@ ggplot(aes(x = morisky_score, y = pilot_medadh), data = medAdherence_wide) +
 ```{r}
 cor.test(medAdherence_wide$sbp_bv1_bv2, medAdherence_wide$pilot_medadh)
 
-glm(uncontrolled_bp_140_bv1_bv2 ~ pilot_medadh,
+glm(uncontrolled_bp_140_6BP ~ pilot_medadh_format_7_bv2,
     data = medAdherence_wide,
     family = binomial(link = "logit")) %>% 
   tbl_regression(exponentiate = TRUE) %>% 
-  modify_caption("Uncontrolled BP (140/90) at BV1 or BV2 on Pilot medication adherence score") %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Pilot medication adherence score (>=7)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_6BP ~ pilot_medadh_format_8_bv2,
+    data = medAdherence_wide,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
   modify_header(label = "**Variable**") %>% 
   bold_labels()
 
@@ -296,11 +340,19 @@ ggplot(aes(x = pilot_medadh, y = sbp_bv1_bv2), data = medAdherence_wide) +
 ```{r}
 cor.test(medAdherence_wide$sbp_bv1, medAdherence_wide$pilot_medadh)
 
-glm(uncontrolled_bp_140_bv1 ~ pilot_medadh,
+glm(uncontrolled_bp_140_BV1 ~ pilot_medadh_format_7_bv2,
     data = medAdherence_wide,
     family = binomial(link = "logit")) %>% 
   tbl_regression(exponentiate = TRUE) %>% 
-  modify_caption("Uncontrolled BP (140/90) at BV1 on Pilot medication adherence score") %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1 on Pilot medication adherence score (>=7)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_BV1 ~ pilot_medadh_format_8_bv2,
+    data = medAdherence_wide,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1 on Pilot medication adherence score (==8)") %>% 
   modify_header(label = "**Variable**") %>% 
   bold_labels()
 
@@ -316,14 +368,6 @@ ggplot(aes(x = pilot_medadh, y = sbp_bv1), data = medAdherence_wide) +
 ### BV2
 ```{r}
 cor.test(medAdherence_wide$sbp_bv2, medAdherence_wide$pilot_medadh)
-
-glm(uncontrolled_bp_140_bv2 ~ pilot_medadh,
-    data = medAdherence_wide,
-    family = binomial(link = "logit")) %>% 
-  tbl_regression(exponentiate = TRUE) %>% 
-  modify_caption("Uncontrolled BP (140/90) at BV2 on Pilot medication adherence score") %>% 
-  modify_header(label = "**Variable**") %>% 
-  bold_labels()
 
 ggplot(aes(x = pilot_medadh, y = sbp_bv2), data = medAdherence_wide) +
   geom_point() +
