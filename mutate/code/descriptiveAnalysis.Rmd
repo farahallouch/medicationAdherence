@@ -111,6 +111,9 @@ medAdherence_wide <- medAdherence_wide %>%
                                              dbp_bv1 >= 90), 1, 0),
          uncontrolled_bp_140_6BP = ifelse((sbp_bv1_bv2 >= 140 |
                                             dbp_bv1_bv2 >= 90), 1, 0))
+
+save(medAdherence_wide, file =  "C:/Users/fallouch/Box/IMPACTS ARMSTRONG/Farah/medicationAdherence/medicationAdherence/mutate/output/medAdherence_wide.Rdata")
+save(medAdherence, file =  "C:/Users/fallouch/Box/IMPACTS ARMSTRONG/Farah/medicationAdherence/medicationAdherence/mutate/output/medAdherence.Rdata")
 ```
 
 # Study population characteristics
@@ -311,6 +314,18 @@ ggplot(aes(x = morisky_score, y = pilot_medadh), data = medAdherence_wide) +
 ```{r}
 cor.test(medAdherence_wide$sbp_bv1_bv2, medAdherence_wide$pilot_medadh)
 
+lm(sbp_bv1_bv2 ~ pilot_medadh_format_7_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1/BV2 average on Pilot medication adherence score (>=7)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+lm(sbp_bv1_bv2 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
 glm(uncontrolled_bp_140_6BP ~ pilot_medadh_format_7_bv2,
     data = medAdherence_wide,
     family = binomial(link = "logit")) %>% 
@@ -339,6 +354,18 @@ ggplot(aes(x = pilot_medadh, y = sbp_bv1_bv2), data = medAdherence_wide) +
 ### BV1 
 ```{r}
 cor.test(medAdherence_wide$sbp_bv1, medAdherence_wide$pilot_medadh)
+
+lm(sbp_bv1 ~ pilot_medadh_format_7_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1 on Pilot medication adherence score (>=7)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+lm(sbp_bv1 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
 
 glm(uncontrolled_bp_140_BV1 ~ pilot_medadh_format_7_bv2,
     data = medAdherence_wide,
@@ -383,6 +410,18 @@ ggplot(aes(x = pilot_medadh, y = sbp_bv2), data = medAdherence_wide) +
 ```{r}
 cor.test(medAdherence_wide$dbp_bv1_bv2, medAdherence_wide$pilot_medadh)
 
+lm(dbp_bv1_bv2 ~ pilot_medadh_format_7_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1/BV2 average on Pilot medication adherence score (>=7)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+lm(dbp_bv1_bv2 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
 ggplot(aes(x = pilot_medadh, y = dbp_bv1_bv2), data = medAdherence_wide) +
   geom_point() +
   geom_smooth() +
@@ -395,6 +434,18 @@ ggplot(aes(x = pilot_medadh, y = dbp_bv1_bv2), data = medAdherence_wide) +
 ### BV1
 ```{r}
 cor.test(medAdherence_wide$dbp_bv1, medAdherence_wide$pilot_medadh)
+
+lm(dbp_bv1 ~ pilot_medadh_format_7_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1 on Pilot medication adherence score (>=7)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+lm(dbp_bv1 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
 
 ggplot(aes(x = pilot_medadh, y = dbp_bv1), data = medAdherence_wide) +
   geom_point() +
