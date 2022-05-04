@@ -1,0 +1,487 @@
+---
+title: "IMPACTS Medication adherence by sex"
+author: "Farah Allouch"
+date: "`r format(Sys.time(), ' %B %d, %Y')`"
+output: 
+  word_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE)
+
+rm(list = ls())
+options(scipen = 999)
+
+library(tidyverse)
+library(gtsummary)
+library(flextable)
+
+load("../output/medAdherence_wide.Rdata")
+
+medAdherence_wide_white <- medAdherence_wide %>% 
+  filter(sex_bdl_bv2 == 1)
+
+medAdherence_wide_black <- medAdherence_wide %>% 
+  filter(sex_bdl_bv2 == 2)
+```
+
+\newpage
+# Study population characteristics
+```{r table_one}
+medAdherence_wide %>% 
+  select(-c(record_id,
+            sbp_bv1_bv2,
+            dbp_bv1_bv2,
+            pilot_medadh_format_7_reg_bv2,
+            pilot_medadh_format_8_reg_bv2)) %>% 
+  filter(race_bdl_bv2 == 1 |
+           race_bdl_bv2 == 2) %>% 
+  tbl_summary(by = race_bdl_bv2,
+              label = NULL) %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+```
+
+\newpage
+# Morisky and BP
+## Systolic BP
+### BV1 and BV2 average
+**White**
+```{r morisky-sbp-white}
+cor.test(medAdherence_wide_white$sbp_bv1_bv2, medAdherence_wide_white$morisky_score)
+
+lm(sbp_bv1_bv2 ~ morisky_score_format, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Mean systolic BP at BV1 and BV2 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_6BP ~ morisky_score_format,
+    data = medAdherence_wide_white,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = sbp_bv1_bv2), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+**Black**
+```{r morisky-sbp-black}
+cor.test(medAdherence_wide_black$sbp_bv1_bv2, medAdherence_wide_black$morisky_score)
+
+lm(sbp_bv1_bv2 ~ morisky_score_format, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Mean systolic BP at BV1 and BV2 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_6BP ~ morisky_score_format,
+    data = medAdherence_wide_black,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = sbp_bv1_bv2), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+\newpage
+### BV1 
+**White**
+```{r morisky-sbp-white-bv1}
+cor.test(medAdherence_wide_white$sbp_bv1, medAdherence_wide_white$morisky_score)
+
+lm(sbp_bv1 ~ morisky_score_format, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_BV1 ~ morisky_score_format,
+    data = medAdherence_wide_white,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = sbp_bv1), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Average systolic BP at BV1") +
+  theme_minimal()
+```
+
+**Black**
+```{r morisky-sbp-black-bv1}
+cor.test(medAdherence_wide_black$sbp_bv1, medAdherence_wide_black$morisky_score)
+
+lm(sbp_bv1 ~ morisky_score_format, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_BV1 ~ morisky_score_format,
+    data = medAdherence_wide_black,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = sbp_bv1), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Average systolic BP at BV1") +
+  theme_minimal()
+```
+
+\newpage
+## Diastolic BP
+### BV1 and BV2 average
+**White**
+```{r morisky-dbp-white}
+cor.test(medAdherence_wide_white$dbp_bv1_bv2, medAdherence_wide_white$morisky_score)
+
+lm(dbp_bv1_bv2 ~ morisky_score_format, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Mean systolic BP at BV1 and BV2 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = dbp_bv1_bv2), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+**Black**
+```{r morisky-dbp-black}
+cor.test(medAdherence_wide_black$dbp_bv1_bv2, medAdherence_wide_black$morisky_score)
+
+lm(dbp_bv1_bv2 ~ morisky_score_format, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Mean systolic BP at BV1 and BV2 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = dbp_bv1_bv2), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+\newpage
+### BV1
+**White**
+```{r morisky-dbp-white-bv1}
+cor.test(medAdherence_wide_white$dbp_bv1, medAdherence_wide_white$morisky_score)
+
+lm(dbp_bv1 ~ morisky_score_format, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = dbp_bv1), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Diastolic systolic BP at BV1") +
+  theme_minimal()
+```
+
+**Black**
+```{r morisky-dbp-black-bv1}
+cor.test(medAdherence_wide_black$dbp_bv1, medAdherence_wide_black$morisky_score)
+
+lm(dbp_bv1 ~ morisky_score_format, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1 on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = dbp_bv1), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Diastolic systolic BP at BV1") +
+  theme_minimal()
+```
+
+\newpage
+# Pilot medication adherence score and Morisky score
+**White**
+```{r}
+cor.test(medAdherence_wide_white$pilot_medadh, medAdherence_wide_white$morisky_score)
+```
+
+**Black**
+```{r}
+cor.test(medAdherence_wide_black$pilot_medadh, medAdherence_wide_black$morisky_score)
+```
+
+## Kappa of pilot medication adherence score (==8) and Morisky score
+**White**
+``` {r}
+vcd::Kappa(table(medAdherence_wide_white$morisky_score_format_dich, medAdherence_wide_white$pilot_medadh_format_8_reg_bv2))
+```
+
+**Black**
+``` {r}
+vcd::Kappa(table(medAdherence_wide_black$morisky_score_format_dich, medAdherence_wide_black$pilot_medadh_format_8_reg_bv2))
+```
+
+**White**
+``` {r}
+medAdherence_wide_white <- medAdherence_wide_white %>% 
+  mutate(morisky_score_format = factor(morisky_score_format,
+                                       levels = c("Low adherence", "Medium adherence", "High adherence")))
+
+glm(pilot_medadh_format_8_reg_bv2 ~ morisky_score_format,
+    data = medAdherence_wide_white,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Pilot medication adherence scale (==8) on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = pilot_medadh), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Pilot medication adherence score") +
+  theme_minimal()
+```
+
+**Black**
+``` {r}
+medAdherence_wide_black <- medAdherence_wide_black %>% 
+  mutate(morisky_score_format = factor(morisky_score_format,
+                                       levels = c("Low adherence", "Medium adherence", "High adherence")))
+
+glm(pilot_medadh_format_8_reg_bv2 ~ morisky_score_format,
+    data = medAdherence_wide_black,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Pilot medication adherence scale (==8) on Morisky score") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = morisky_score, y = pilot_medadh), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Morisky score") +
+  ylab("Pilot medication adherence score") +
+  theme_minimal()
+```
+
+\newpage
+# Pilot medication adherence score and BP
+## Systolic BP
+### BV1 and BV2 average
+**White**
+```{r}
+cor.test(medAdherence_wide_white$sbp_bv1_bv2, medAdherence_wide_white$pilot_medadh)
+
+lm(sbp_bv1_bv2 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_6BP ~ pilot_medadh_format_8_bv2,
+    data = medAdherence_wide_white,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = sbp_bv1_bv2), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+**Black**
+```{r}
+cor.test(medAdherence_wide_black$sbp_bv1_bv2, medAdherence_wide_black$pilot_medadh)
+
+lm(sbp_bv1_bv2 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_6BP ~ pilot_medadh_format_8_bv2,
+    data = medAdherence_wide_black,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = sbp_bv1_bv2), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+\newpage
+### BV1 
+**White**
+```{r}
+cor.test(medAdherence_wide_white$sbp_bv1, medAdherence_wide_white$pilot_medadh)
+
+lm(sbp_bv1 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_BV1 ~ pilot_medadh_format_8_bv2,
+    data = medAdherence_wide_white,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = sbp_bv1), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Average systolic BP at BV1") +
+  theme_minimal()
+```
+
+**Black**
+```{r}
+cor.test(medAdherence_wide_black$sbp_bv1, medAdherence_wide_black$pilot_medadh)
+
+lm(sbp_bv1 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Systolic BP at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+glm(uncontrolled_bp_140_BV1 ~ pilot_medadh_format_8_bv2,
+    data = medAdherence_wide_black,
+    family = binomial(link = "logit")) %>% 
+  tbl_regression(exponentiate = TRUE) %>% 
+  modify_caption("Uncontrolled BP (140/90) at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = sbp_bv1), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Average systolic BP at BV1") +
+  theme_minimal()
+```
+
+\newpage
+## Diastolic BP
+### BV1 and BV2 average
+**White**
+```{r}
+cor.test(medAdherence_wide_white$dbp_bv1_bv2, medAdherence_wide_white$pilot_medadh)
+
+lm(dbp_bv1_bv2 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = dbp_bv1_bv2), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+**Black**
+```{r}
+cor.test(medAdherence_wide_black$dbp_bv1_bv2, medAdherence_wide_black$pilot_medadh)
+
+lm(dbp_bv1_bv2 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1/BV2 average on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = dbp_bv1_bv2), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Mean systolic BP at BV1 and BV2") +
+  theme_minimal()
+```
+
+\newpage
+### BV1
+**White**
+```{r}
+cor.test(medAdherence_wide_white$dbp_bv1, medAdherence_wide_white$pilot_medadh)
+
+lm(dbp_bv1 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_white) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = dbp_bv1), data = medAdherence_wide_white) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Diastolic systolic BP at BV1") +
+  theme_minimal()
+```
+
+**Black**
+```{r}
+cor.test(medAdherence_wide_black$dbp_bv1, medAdherence_wide_black$pilot_medadh)
+
+lm(dbp_bv1 ~ pilot_medadh_format_8_bv2, data = medAdherence_wide_black) %>% 
+  tbl_regression() %>% 
+  modify_caption("Diastolic BP at BV1 on Pilot medication adherence score (==8)") %>% 
+  modify_header(label = "**Variable**") %>% 
+  bold_labels()
+
+ggplot(aes(x = pilot_medadh, y = dbp_bv1), data = medAdherence_wide_black) +
+  geom_point() +
+  geom_smooth() +
+  xlab("Pilot medication adherence score") +
+  ylab("Diastolic systolic BP at BV1") +
+  theme_minimal()
+```
