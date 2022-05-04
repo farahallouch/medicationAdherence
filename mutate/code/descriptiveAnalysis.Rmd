@@ -112,8 +112,8 @@ medAdherence_wide <- medAdherence_wide %>%
          uncontrolled_bp_140_6BP = ifelse((sbp_bv1_bv2 >= 140 |
                                             dbp_bv1_bv2 >= 90), 1, 0))
 
-save(medAdherence_wide, file =  "C:/Users/fallouch/Box/IMPACTS ARMSTRONG/Farah/medicationAdherence/medicationAdherence/mutate/output/medAdherence_wide.Rdata")
-save(medAdherence, file =  "C:/Users/fallouch/Box/IMPACTS ARMSTRONG/Farah/medicationAdherence/medicationAdherence/mutate/output/medAdherence.Rdata")
+save(medAdherence_wide, file =  "../output/medAdherence_wide.Rdata")
+save(medAdherence, file =  "../output/medAdherence.Rdata")
 ```
 
 # Study population characteristics
