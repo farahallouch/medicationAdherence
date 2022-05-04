@@ -244,17 +244,6 @@ cor.test(medAdherence_wide_white$pilot_medadh, medAdherence_wide_white$morisky_s
 cor.test(medAdherence_wide_black$pilot_medadh, medAdherence_wide_black$morisky_score)
 ```
 
-## Kappa of pilot medication adherence score (==8) and Morisky score
-**White**
-``` {r}
-vcd::Kappa(table(medAdherence_wide_white$morisky_score_format_dich, medAdherence_wide_white$pilot_medadh_format_8_reg_bv2))
-```
-
-**Black**
-``` {r}
-vcd::Kappa(table(medAdherence_wide_black$morisky_score_format_dich, medAdherence_wide_black$pilot_medadh_format_8_reg_bv2))
-```
-
 **White**
 ``` {r}
 medAdherence_wide_white <- medAdherence_wide_white %>% 
